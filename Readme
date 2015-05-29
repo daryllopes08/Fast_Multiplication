@@ -1,0 +1,55 @@
+This tar archive contains ten C files, a Makefile, and this Readme file.
+
+The Makefile has targets for creating main32, main16, and main4, and
+will build all three in that order by default.  It has other useful
+targets:
+make clean -- deletes *.o and the binary files
+make turnin -- makes a tar.gz file with your username, and the various
+  source files.  Doesn't include your report file.
+
+The mainX.c are the files containing the test code that calls the
+multiplication routine.  The multiplication routine is defined and
+implemented in the scaffoldX.c file.  The scaffoldX.c file is currently
+the place holder for the student's own implementation of the fast
+multiplication routine for the X = 4, 16, 32 bit words.  mainX.c
+declares the multiplication routine to be tested as an external function
+defined in scaffoldX.c
+
+myutil.c has functions for accurate timing, and finding the number of
+its.
+
+Currently, mainX.c creates a sequence of random big integer pairs. The
+number of bits in each integer and the number of pairs to create can be
+passed in as arguments, as can a base for printing results. E.g.
+main16  #  x 1000 bits, y 1000 bits, 100 tests, no printing
+main16 10000 1000  # x 10000 bits, y 1000 bits, 100 tests, no printing
+main32 80 50 1 10 # x 80 bits, y 50 bits, 1 test, base 10 printing
+main32 80 50 1 2 # x 80 bits, y 50 bits, 1 test, base 2 printing
+main32 80 50 1 16 # x 80 bits, y 50 bits, 1 test, base 16 printing
+main32 80 50 1 1 # x 80 bits, y 50 bits, 1 test, base 1 printing -- error!
+
+
+Printing is of operands and results; mainX always prints a summary of
+the number of tests passed and failed, the time taken by student and GMP
+code, and the ratio of those times.
+
+mainX.c calls the GMP mpz routines to generate the random integers.
+mainX.c then exports those integers as a C integer array.  In the case
+of X=4, the words are of size 8 bits, two digits per word.
+The ordering of the bits is least sigificant bits first (see the
+parameters to mpz_export and mpz_import).  The bit words are then passed
+as arguments to the multiplication routine in scaffoldX.c. The
+multiplication routine, after computing the product, returns the answer
+in another array back to mainX.c.  mainX.c imports the result back in as
+a GMP mpz_t integer and compares the result with the native mpz_t
+integers multiplication routine to check whether the result is valid or
+not.
+
+A sequence of bit words is assumed to be a void pointer to some memory
+locations. The void pointer can then be cast to be either a 32 bit
+unsigned integer, a 16 bit unsigned short integer, or a 8-bit unsigned
+char, or some other types, depending on the implementation.  Examples
+are provided in the scaffoldX.c files.
+
+GMP's number generation seems to segfault at around 100 million bits,
+which puts a bound on how big the numbers can be.
